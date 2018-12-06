@@ -1,11 +1,6 @@
-use std::fs::File;
-use std::io::Read;
-
 fn main() {
-    let mut f = File::open("input.txt").expect("error: cannot open file");
-    let mut contents = String::new();
-    f.read_to_string(&mut contents).expect("error: something went wrong reading the file");
-    println!("{}", thingy(&frequencies_from_string(&contents)))
+    let input = include_str!("input.txt");
+    println!("{}", thingy(&frequencies_from_string(&input)))
 }
 
 fn frequencies_from_string(freq_string: &str) -> Vec<i32> {
