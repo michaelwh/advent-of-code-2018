@@ -1,6 +1,8 @@
+use std::collections::HashSet;
+
 fn main() {
     let input = include_str!("input.txt");
-    println!("{}", thingy(&frequencies_from_string(&input)))
+    println!("{}", thingy_day2(&frequencies_from_string(&input)))
 }
 
 fn frequencies_from_string(freq_string: &str) -> Vec<i32> {
@@ -16,6 +18,25 @@ fn thingy(freq: &[i32]) -> i32 {
     total
 }
 
+fn thingy_day2(freq: &[i32]) -> i32 {
+    let mut set = HashSet::new();
+    set.insert(0);
+    let mut total = 0;
+    for f in freq.iter().cycle() {
+        total += f;
+        if set.contains(&total) {
+            return total
+        }
+        set.insert(total);
+    }
+    0
+}
+
+#[test]
+fn day2_given_plusone_minusone_returns_0()
+{
+    assert_eq!(thingy_day2(&[1, -1]), 0)
+}
 
 #[test]
 fn given_nothing_returns_zero() {
