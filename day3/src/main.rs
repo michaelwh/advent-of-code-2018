@@ -8,7 +8,7 @@ struct Spec {
     size: (u32, u32)
 }
 
-fn spec_parser(spec_string: &str) -> Spec {
+fn spec_parser_old(spec_string: &str) -> Spec {
     let mut whitespace_split = spec_string.split_whitespace();
     let id = whitespace_split.next().unwrap().chars().skip(1).collect::<String>().to_string().parse().unwrap();
     let rest_of_string = whitespace_split.collect::<String>().to_string();
@@ -23,6 +23,30 @@ fn spec_parser(spec_string: &str) -> Spec {
         start: (start_x, start_y),
         size: (size_x, size_y)
     }
+}
+
+fn spec_parser_newer_old(spec_string: &str) -> Spec {
+    let mut parts = spec_string.split(['#', '@', ',', ':', 'x'].as_ref()).skip(1);
+    let id = parts.next().unwrap().trim().parse().unwrap();
+    let start_x = parts.next().unwrap().trim().parse().unwrap();
+    let start_y = parts.next().unwrap().trim().parse().unwrap();
+    let size_x = parts.next().unwrap().trim().parse().unwrap();
+    let size_y = parts.next().unwrap().trim().parse().unwrap();
+    Spec {
+        id: id,
+        start: (start_x, start_y),
+        size: (size_x, size_y)
+    }
+}
+
+fn spec_parser(spec_string: &str) -> Spec {
+    let numbers = spec_string.split(['#', '@', ',', ':', 'x'].as_ref()).skip(1)
+                             .map(|s| -> u32 {s.trim().parse().unwrap()}).collect::<Vec<_>>();
+
+    return match numbers.as_slice() {
+        [id, start_x, start_y, size_x, size_y] => Ok(Spec { id: *id, start: (*start_x, *start_y), size: (*size_x, *size_y)}),
+        _ => Err("Could not parse spec")
+    }.unwrap()
 }
 
 #[test]
