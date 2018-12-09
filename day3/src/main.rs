@@ -1,3 +1,7 @@
+#[macro_use] extern crate itertools;
+
+use itertools::Itertools;
+
 fn main() {
     println!("Hello, world!");
 }
@@ -49,6 +53,16 @@ fn spec_parser(spec_string: &str) -> Spec {
     }.unwrap()
 }
 
+fn cells(spec: Spec) -> Vec<(u32, u32)> {
+    let mut vector = Vec::new();
+    for x in (spec.start.0..spec.start.0 + spec.size.0) {
+        for y in (spec.start.1..spec.start.1 + spec.size.1) {
+            vector.push((x, y));
+        }
+    }
+    vector
+}
+
 #[test]
 fn given_zeros_spec_gives_zeros() {
     let spec = spec_parser(&"#0 @ 0,0: 0x0");
@@ -85,4 +99,23 @@ fn given_nonzero_multi_digit_size_x() {
 #[test]
 fn given_nonzero_multi_digit_size_y() {
     assert_eq!(spec_parser(&"#123 @ 456,789: 123x456").size.1, 456);
+}
+
+#[test]
+fn cells_given_1x1_at_0_0() {
+    assert_eq!(cells(Spec { id: 0, start: (0, 0), size: (1, 1)}), vec![(0, 0)])
+}
+
+#[test]
+fn cells_given_2x2_at_0_0() {
+    let c = cells(Spec { id: 0, start: (0, 0), size: (2, 2)});
+    assert!(c.contains(&(0, 0)));
+    assert!(c.contains(&(0, 1)));
+    assert!(c.contains(&(1, 0)));
+    assert!(c.contains(&(1, 1)));
+}
+
+#[test]
+fn cells_given_1x1_at_1_3() {
+    assert_eq!(cells(Spec { id: 0, start: (1, 3), size: (1, 1)}), vec![(1, 3)])
 }
