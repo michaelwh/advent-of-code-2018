@@ -11,7 +11,7 @@ struct Spec {
 fn spec_parser(spec_string: &str) -> Spec {
     let mut whitespace_split = spec_string.split_whitespace();
     let id = whitespace_split.next().unwrap().chars().skip(1).collect::<String>().to_string().parse().unwrap();
-    let mut rest_of_string = whitespace_split.collect::<String>().to_string();
+    let rest_of_string = whitespace_split.collect::<String>().to_string();
     let mut string_iter = rest_of_string.chars();
     let start_x = string_iter.by_ref().skip_while(|c| *c != '@').skip(1).take_while(|c| *c != ',').collect::<String>().parse().unwrap();
     let start_y = string_iter.by_ref().take_while(|c| *c != ':').collect::<String>().parse().unwrap();
