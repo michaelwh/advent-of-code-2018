@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+
 fn main() {
     let lines = include_str!("input.txt").lines().collect::<Vec<_>>();
     println!("Day 3 part 1: {}", overlapper(&lines[..]));
+    println!("Day 3 part 2: {}", not_overlapper(&lines[..]).unwrap().id);
 }
 
 struct Spec {
@@ -19,7 +22,7 @@ fn spec_parser(spec_string: &str) -> Spec {
     }.unwrap()
 }
 
-fn cells(spec: Spec) -> Vec<(u32, u32)> {
+fn cells(spec: &Spec) -> Vec<(u32, u32)> {
     let mut vector = Vec::new();
     for x in spec.start.0..spec.start.0 + spec.size.0 {
         for y in spec.start.1..spec.start.1 + spec.size.1 {
@@ -29,19 +32,22 @@ fn cells(spec: Spec) -> Vec<(u32, u32)> {
     vector
 }
 
-fn overlapper(spec_strings: &[&str]) -> usize {
-    use std::collections::HashMap;
-
+fn gridder(spec_strings: &[&str]) -> HashMap<(u32, u32), usize> {
     let mut claimed = HashMap::new();
     for spec_string in spec_strings {
         let spec = spec_parser(spec_string);
-        for cell in cells(spec) {
+        for cell in cells(&spec) {
             match claimed.get(&cell) {
                 Some(&num) => claimed.insert(cell, num + 1),
                 _ => claimed.insert(cell, 1)
             };
         }
     }
+    claimed
+}
+
+fn overlapper(spec_strings: &[&str]) -> usize {
+    let claimed = gridder(spec_strings);
     let mut num_overlapped: usize = 0;
     for (_cell, num) in claimed {
         if num > 1 {
@@ -49,6 +55,18 @@ fn overlapper(spec_strings: &[&str]) -> usize {
         }
     }
     num_overlapped
+}
+
+fn not_overlapper(spec_strings: &[&str]) -> Option<Spec> {
+    let claimed = gridder(spec_strings);
+
+    for spec_string in spec_strings {
+        let spec = spec_parser(spec_string);
+        if cells(&spec).iter().all(|cell| claimed.get(cell).unwrap_or(&0) <= &1) {
+            return Some(spec);
+        }
+    }
+    None
 }
 
 #[test]
@@ -91,12 +109,12 @@ fn given_nonzero_multi_digit_size_y() {
 
 #[test]
 fn cells_given_1x1_at_0_0() {
-    assert_eq!(cells(Spec { id: 0, start: (0, 0), size: (1, 1)}), vec![(0, 0)])
+    assert_eq!(cells(&Spec { id: 0, start: (0, 0), size: (1, 1)}), vec![(0, 0)])
 }
 
 #[test]
 fn cells_given_2x2_at_0_0() {
-    let c = cells(Spec { id: 0, start: (0, 0), size: (2, 2)});
+    let c = cells(&Spec { id: 0, start: (0, 0), size: (2, 2)});
     assert!(c.contains(&(0, 0)));
     assert!(c.contains(&(0, 1)));
     assert!(c.contains(&(1, 0)));
@@ -105,12 +123,17 @@ fn cells_given_2x2_at_0_0() {
 
 #[test]
 fn cells_given_1x1_at_1_3() {
-    assert_eq!(cells(Spec { id: 0, start: (1, 3), size: (1, 1)}), vec![(1, 3)]);
+    assert_eq!(cells(&Spec { id: 0, start: (1, 3), size: (1, 1)}), vec![(1, 3)]);
 }
 
 #[test]
 fn overlapper_given_example() {
     assert_eq!(overlapper(&["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]), 4);
+}
+
+#[test]
+fn not_overlapper_given_example() {
+    assert_eq!(not_overlapper(&["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]).unwrap().id, 3);
 }
 
 // working, but worse
